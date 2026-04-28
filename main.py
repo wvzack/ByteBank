@@ -3,7 +3,7 @@ import numpy as np
 import leaderboard
 import notifications_transactions
 import pay_message_check as mc
-
+from pathlib import Path
 
 
 startmoney = 1000
@@ -13,25 +13,26 @@ data = {
 
 
 def read_file():
-    f = open("/home/pi/Python_Projects/ByteBank/data.txt", "r")
-    file_contents = f.read()
-    f.close()
-    return(file_contents)
+    path = Path(__file__).parent / 'data.txt'
+    with open(path, "r") as f:
+        file_contents = f.read()
+        return(file_contents)
 
 def write_file(content):
-    f = open("/home/pi/Python_Projects/ByteBank/data.txt", "w")
-    f.write(json.dumps(content))
-    f.close()
-    
+    path = Path(__file__).parent / 'data.txt'
+    with open(path, "w") as f:
+        f.write(json.dumps(content))
 
 def add_save(key, value):
     data = json.loads(read_file())
     data[key] = value
     write_file(data)
-    #print(f"Added user: {key} with balance: {value}")  # Print confirmation message
+    print(f"Added user: {key} with balance: {value}")  # Print confirmation message
     return "done"
 
 def get_value(username):
+    username = username.lower()
+
     data = dict(json.loads(read_file()))
       # Print the loaded data dictionary
 
@@ -41,6 +42,8 @@ def get_value(username):
     return data.get(username)
 
 def pay_user(from_user, to_user, amount, message):
+    from_user = from_user.lower()
+    to_user = to_user.lower()
 
     data = json.loads(read_file())
     message_id = mc.get_comment_id(from_user, message)
@@ -52,6 +55,7 @@ def pay_user(from_user, to_user, amount, message):
     if not to_user in data:
         data[to_user] = startmoney 
         write_file(data)
+    print(from_user)
 
     if not int(data.get(from_user)) >= int(amount) or int(amount) <= 0:
             print("failed")
@@ -65,6 +69,7 @@ def pay_user(from_user, to_user, amount, message):
         return("successful")
     
 def view_notifications(user):
+    user = user.lower()
     raw_notifications_string = notifications_transactions.view_notifications(user)
     #print(f"DEBUG: String received from notifications_transactions: '{raw_notifications_string}'") # Add this line
     processed_notifications = append_to_notifications_string_based(raw_notifications_string)
@@ -78,7 +83,7 @@ def sort():
 
 
 def gift_user(to_user, amount):
-
+    # i dont think this function is actually used, but if it is, remember to lowercase to_user
     data = json.loads(read_file())
 
 
@@ -104,6 +109,8 @@ def gift_user(to_user, amount):
 #FUNCTIONS
 
 #The following script is made by gemini
+# wow okay wow. incredible
+# you needed AN AI for this???
 
 def append_to_notifications_string_based(data_string):
     """
